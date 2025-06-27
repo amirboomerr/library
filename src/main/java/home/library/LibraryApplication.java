@@ -175,7 +175,7 @@ public class LibraryApplication extends Application {
 						if (yearText.isEmpty()) return true;
 						try {
 							int yearFilter = Integer.parseInt(yearText);
-							return book.getYear() > yearFilter; // изменено условие: книги после введённого года
+							return book.getYear() > yearFilter;
 						} catch (NumberFormatException exception) {
 							// Если введён некорректный год, игнорируем фильтр по году
 							return true;
