@@ -1,0 +1,98 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.0'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'application'
+	id 'org.openjfx.javafxplugin' version '0.0.14'
+}
+
+group = 'home'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	// JavaFX для runtime
+	implementation 'org.openjfx:javafx-controls:21.0.2'
+	implementation 'org.openjfx:javafx-fxml:21.0.2'
+	implementation 'org.openjfx:javafx-graphics:21.0.2'
+
+	// Spring Data JPA
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// Lombok
+	compileOnly 'org.projectlombok:lombok:1.18.30'
+	annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+	// PostgreSQL драйвер
+	runtimeOnly 'org.postgresql:postgresql:42.6.0'
+
+	// Тестовые зависимости
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine' // исключаем JUnit 4
+	}
+	testImplementation 'org.testfx:testfx-core:4.0.17'
+	testImplementation 'org.testfx:testfx-junit5:4.0.17'
+	testImplementation 'org.mockito:mockito-core:5.3.1'
+
+	// Явно указываем последнюю версию JUnit Jupiter (5.12.2) для согласованности
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.12.2'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.12.2'
+}
+
+configurations.all {
+	resolutionStrategy {
+		force 'org.junit.jupiter:junit-jupiter-api:5.12.2'
+		force 'org.junit.jupiter:junit-jupiter-engine:5.12.2'
+		force 'org.junit.platform:junit-platform-commons:1.12.2'
+		force 'org.junit.platform:junit-platform-engine:1.12.2'
+		force 'org.junit.platform:junit-platform-launcher:1.12.2'
+	}
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+	jvmArgs = [
+			'--add-exports', 'javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
+			'--add-opens', 'javafx.graphics/javafx.stage=ALL-UNNAMED',
+			'-Dtestfx.headless=true',
+			'-Dprism.order=sw',
+			'-Dprism.text=t2k',
+			'-Djava.awt.headless=true'
+	]
+}
+
+javafx {
+	version = "21"
+	modules = [ 'javafx.controls', 'javafx.fxml' ]
+}
+
+application {
+	mainClass = 'home.library.LibraryApplication'
+}
+
+jar {
+	manifest {
+		attributes(
+				'Main-Class': 'home.library.LibraryApplication'  // замените на ваш главный класс
+		)
+	}
+	from {
+		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+	}
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
